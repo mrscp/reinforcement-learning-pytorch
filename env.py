@@ -15,6 +15,7 @@ class ChopperScape(Env, ABC):
 
         # Define a 2-D observation space
         self.observation_shape = (600, 800, 3)
+        self.output_shape = (128, 128, 3)
         self.observation_space = spaces.Box(low=np.zeros(self.observation_shape),
                                             high=np.ones(self.observation_shape),
                                             dtype=np.float16)
@@ -101,7 +102,10 @@ class ChopperScape(Env, ABC):
         self.draw_elements_on_canvas()
 
         # return the observation
-        return self.canvas
+        return self.get_state()
+
+    def get_state(self):
+        return cv2.resize(self.canvas, (self.output_shape[0], self.output_shape[1]))
 
     def render(self, mode="human"):
         assert mode in ["human", "rgb_array"], "Invalid mode, must be either \"human\" or \"rgb_array\""
@@ -221,7 +225,7 @@ class ChopperScape(Env, ABC):
         if done:
             self.generation += 1
 
-        return self.canvas, reward, done, {}
+        return self.get_state(), reward, done, False, {}
 
 
 class Point(object):
@@ -264,9 +268,9 @@ class Chopper(Point):
 class Bird(Point):
     def __init__(self, name, x_max, x_min, y_max, y_min):
         super(Bird, self).__init__(name, x_max, x_min, y_max, y_min)
-        self.icon = cv2.imread("assets/bird.png") / 255.0
-        self.icon_w = 32
-        self.icon_h = 32
+        self.icon = cv2.imread("assets/helicopter.png") / 255.0
+        self.icon_w = 64
+        self.icon_h = 64
         self.icon = cv2.resize(self.icon, (self.icon_h, self.icon_w))
 
 
